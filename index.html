@@ -1,396 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coxygen Flash Loan — Powered by Cardano</title>
-  <link rel="icon" type="image/png" href="./images/coxygen.png" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Coxygen Global — Flash Loan Dashboard</title>
+  <link rel="icon" href="./images/coxygen.png" />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;600;700&display=swap");
+    /* --- Typography & root --- */
+    @import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;600;700&display=swap');
 
-    :root {
-      --bg: #0b0f19;
-      --card: #141b2d;
-      --accent: #00aaff;
-      --text: #f5f6fa;
-      --muted: #9aa0b6;
-      --radius: 14px;
-      --transition: 0.3s ease all;
+    :root{
+      --bg: #0b1220;
+      --panel: #0f1724;
+      --muted: #97a0b6;
+      --accent: #00c2ff;
+      --accent-2: #46e6b3;
+      --glass: rgba(255,255,255,0.03);
+      --card-radius: 14px;
+      --pad: 18px;
+      --soft-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      color-scheme: dark;
+      font-family: "League Spartan", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: "League Spartan", sans-serif;
-      line-height: 1.5;
-      overflow-x: hidden;
+    html,body{
+      height:100%;
+      margin:0;
+      background: linear-gradient(180deg,#07101b 0%, #07131b 60%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color: #eaf2ff;
     }
 
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 30px;
-      background: #101626;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    /* --- Layout --- */
+    .topbar{
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:10px 28px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      position:sticky;
+      top:0;
+      z-index:50;
     }
 
-    .navbar img {
-      height: 42px;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .brand img{ height:46px; width:auto; display:block; border-radius:8px; }
+    .brand h1{
+      font-size:18px;
+      margin:0;
+      color:var(--accent);
+      letter-spacing:0.3px;
+    }
+    .brand small{ display:block; color:var(--muted); font-size:12px; margin-top:2px; }
+
+    .container{
+      max-width:1180px;
+      margin:28px auto;
+      padding:0 20px;
     }
 
-    .navbar h1 {
-      font-size: 1.4rem;
-      color: var(--accent);
-      font-weight: 700;
-      letter-spacing: 0.5px;
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:22px;
+      align-items:start;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 20px;
+    /* --- Cards --- */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: var(--card-radius);
+      padding: var(--pad);
+      box-shadow: var(--soft-shadow);
+      border: 1px solid rgba(255,255,255,0.02);
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 25px;
+    .panel-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .panel-title h2{ margin:0; font-size:1.05rem; color:var(--accent); }
+    .panel-title .sub{ color:var(--muted); font-size:0.85rem; }
+
+    /* --- balance --- */
+    .balance {
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      background: linear-gradient(90deg, rgba(0,194,255,0.04), rgba(70,230,179,0.02));
+      padding:12px;
+      border-radius:10px;
+      margin-bottom:18px;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+    .balance .left{ display:flex; flex-direction:column; gap:4px; }
+    .balance .label{ color:var(--muted); font-size:0.85rem; }
+    .balance .amount{ font-size:1.6rem; font-weight:700; color:var(--accent); }
+
+    /* --- forms --- */
+    label{ display:block; font-size:0.86rem; color:var(--muted); margin-bottom:6px; }
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.01);
+      color: #eaf2ff;
+      font-size:0.95rem;
+      box-sizing:border-box;
+      outline:none;
+      transition: all 180ms ease;
+    }
+    input:focus, select:focus{
+      box-shadow: 0 0 0 6px rgba(0,194,255,0.06);
+      border-color: rgba(0,194,255,0.7);
     }
 
-    .card {
-      background: var(--card);
-      padding: 24px;
-      border-radius: var(--radius);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      transition: var(--transition);
-    }
+    .row{ display:flex; gap:12px; }
+    .col{ flex:1; }
 
-    .card:hover {
-      transform: translateY(-3px);
-    }
+    .muted{ color:var(--muted); font-size:0.86rem; }
 
-    h2 {
-      margin-top: 0;
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: var(--accent);
+    .actions{ display:flex; gap:10px; margin-top:10px; }
+    button{
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:700;
+      border:0;
+      cursor:pointer;
+      font-size:0.95rem;
+      transition: all 160ms ease;
     }
+    .btn-primary{ background: linear-gradient(90deg,var(--accent), var(--accent-2)); color:#041220; box-shadow: 0 8px 20px rgba(0,194,255,0.08); }
+    .btn-ghost{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.02); }
+    .btn-danger{ background:#ff6b6b; color:#fff; }
 
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 0.9rem;
+    .btn-primary:hover{ transform: translateY(-3px); }
+    .btn-ghost:hover{ background: rgba(255,255,255,0.01); transform: translateY(-2px); }
+
+    /* --- session & history --- */
+    .session {
+      background: linear-gradient(180deg, rgba(255,255,255,0.016), rgba(255,255,255,0.01));
+      padding:12px;
+      border-radius:10px;
+      border: 1px solid rgba(255,255,255,0.02);
+      margin-bottom:12px;
+      min-height:78px;
     }
+    .session .k{ color:var(--muted); font-size:0.85rem; }
+    .session .v{ font-weight:700; color:var(--accent); margin-top:6px; font-size:0.95rem; }
 
-    input,
-    select {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid #2b3248;
-      background: #1b2235;
-      color: var(--text);
-      outline: none;
-      font-size: 0.95rem;
-      transition: var(--transition);
+    .history-list{ margin-top:10px; max-height:220px; overflow:auto; padding-right:6px; }
+    .hist-item{
+      display:flex; justify-content:space-between; gap:12px; padding:10px 8px;
+      border-radius:8px; margin-bottom:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.007), rgba(255,255,255,0.006));
+      border: 1px solid rgba(255,255,255,0.01);
     }
+    .hist-left{ color:var(--muted); font-size:0.9rem; }
+    .hist-right{ font-weight:700; color:var(--accent); }
 
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 6px var(--accent);
-    }
+    .note{ color:var(--muted); font-size:0.82rem; margin-top:12px; }
 
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      font-family: inherit;
-    }
-
-    .btn-accent {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .btn-accent:hover {
-      opacity: 0.85;
-      transform: scale(1.02);
-    }
-
-    .btn-secondary {
-      background: #2b3248;
-      color: var(--muted);
-    }
-
-    .btn-secondary:hover {
-      background: #343d5c;
-    }
-
-    .balance-display {
-      background: #101626;
-      border-radius: var(--radius);
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .balance-display h3 {
-      margin: 0;
-      font-size: 1rem;
-      color: var(--muted);
-    }
-
-    .balance-display span {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--accent);
-      transition: var(--transition);
-    }
-
-    .terms {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-top: 30px;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 14px;
-      font-size: 1rem;
-      color: var(--accent);
-      display: none;
-    }
-
-    @media (max-width: 850px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
+    /* small screen */
+    @media (max-width:880px){
+      .layout{ grid-template-columns: 1fr; }
+      .topbar{ padding:10px 16px; }
     }
   </style>
 
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+  <!-- keep type=module and your imports intact so functionality is unchanged -->
   <script type="module">
-    import {
-      bytesToHex,
-      Cip30Wallet,
-      WalletHelper,
-      TxOutput,
-      Assets,
-      bytesToText,
-      hexToBytes,
-      AssetClass,
-      Tx,
-      Address,
-      NetworkParams,
-      Value,
-      MintingPolicyHash,
-      Program,
-      ByteArrayData,
-      ConstrData,
-      NetworkEmulator,
-      PubKey,
-      textToBytes,
-      Datum,
-      ListData,
-      IntData,
+    /* ===========================
+       YOUR ORIGINAL IMPORTS (UNCHANGED)
+       =========================== */
+    import{
+        bytesToHex,Cip30Wallet,WalletHelper,TxOutput,
+        Assets,bytesToText,hexToBytes,AssetClass,
+        Tx,Address, NetworkParams, Value,MintingPolicyHash,
+        Program,ByteArrayData,ConstrData,NetworkEmulator,PubKey,
+        textToBytes,Datum,ListData,IntData
     } from "./helios.js";
 
-    import {
-      txPrerequisites,
-      init,
-      walletEssentials,
-      txFunc,
-      hlib,
-      hexToTex,
-      shortAddressFunc,
-      addressFunc,
-      adaFunc,
-      assetFunc,
-      getAssets,
-      sendADA,
-      sendAssets,
-      showWalletData,
-      mint,
-      txDeadLine,
-      baseAddressPKH,
-      submitTx,
-      getAssetsFromValue,
+    import{
+        txPrerequisites,init,walletEssentials,txFunc,hlib,hexToTex,shortAddressFunc,
+        addressFunc, adaFunc, assetFunc,getAssets,sendADA,sendAssets,
+        showWalletData,mint,txDeadLine,baseAddressPKH,submitTx, getAssetsFromValue
     } from "./coxylib.js";
 
-    import { opt, j } from "./jimba.js";
+    import{opt,j} from "./jimba.js";
 
-    opt._R = 1;
-    opt._O = 1;
-    opt._M = 1;
-    opt._T = 1;
-    opt._Ob = 0;
-    opt._FailsOnly = 0;
-    opt._F = 0;
-    opt._tNo = 1;
+    /* preserve all jimba options exactly */
+    opt._R = 1;//run all tests, checks and logs
+    opt._O = 1; //run only logs
+    opt._M = 1; //show stake frames of logs
+    opt._T = 1; //run tests
+    opt._Ob = 0; //show tests stack frames
+    opt._FailsOnly = 0; //run only failed tests
+    opt._F = 0;  //show functions that are marked with j.s() and j.e() for function profiling
+    opt._tNo = 1; //this is the number of times testPack will run
 
-    const dom = (id) => document.getElementById(id);
+    /* ===========================
+       DOM helpers & state (non-invasive)
+       =========================== */
+    const $ = id => document.getElementById(id);
+    const pushHistory = (entry) => {
+      const list = $("historyList");
+      const item = document.createElement("div");
+      item.className = "hist-item";
+      item.innerHTML = `<div class="hist-left">${entry.title}<div class="note" style="margin-top:6px;color:var(--muted);font-weight:400">${entry.subtitle||''}</div></div>
+                        <div class="hist-right">${entry.amount}</div>`;
+      list.prepend(item);
+    };
 
-    const wallet = await init(j);
-    const walletData = await walletEssentials(
-      wallet,
-      Cip30Wallet,
-      WalletHelper,
-      Value,
-      txPrerequisites.minAda,
-      j
-    );
+    // small safe wrapper to avoid breaking original behaviour; uses your existing helpers
+    (async function main(){
+      try{
+        const wallet = await init(j); // kept exactly as your original flow
+        const walletData = await walletEssentials(wallet,Cip30Wallet,WalletHelper,Value,txPrerequisites.minAda,j);
+        j.log({walletData});
 
-    let balance = await adaFunc(walletData, j);
-    dom("adaBalance").innerText = "₳ " + (balance / 1_000_000).toLocaleString();
+        // get initial balance via your adaFunc helper
+        let displayLovelace = await adaFunc(walletData,j);
+        let displayAda = (displayLovelace / 1000000);
+        $("adaBalance").innerText = "₳ " + displayAda.toLocaleString();
 
-    async function refreshBalance() {
-      balance = await adaFunc(walletData, j);
-      dom("adaBalance").innerText = "₳ " + (balance / 1_000_000).toLocaleString();
-    }
-
-    // Send ADA
-    dom("sendAdaForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const recipient = dom("recipient").value;
-      const amount = dom("amount").value;
-
-      if (!recipient || !amount)
-        return swal("Incomplete", "Enter recipient and amount.", "warning");
-
-      swal("Sending...", "Processing transaction.", "info");
-      try {
-        await sendADA(recipient, amount);
-        await refreshBalance();
-        swal("Success", "ADA sent successfully!", "success");
-      } catch (err) {
-        console.error(err);
-        swal("Error", "Transaction failed.", "error");
-      }
-    });
-
-    // Flash Loan
-    dom("flashLoanForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const amount = dom("loanAmount").value;
-      const target = dom("loanTarget").value;
-
-      if (!amount || !target)
-        return swal("Missing Info", "Enter amount and target address.", "warning");
-
-      swal({
-        title: "Confirm Flash Loan",
-        text: `Execute flash loan of ₳${amount}?`,
-        icon: "info",
-        buttons: ["Cancel", "Proceed"],
-      }).then(async (confirm) => {
-        if (!confirm) return;
-
-        try {
-          const before = await adaFunc(walletData, j);
-          await sendADA(target, amount);
-          window.__flashLoan = { before, amount, target };
-          await refreshBalance();
-          swal("Loan Executed", "Flash loan transaction sent.", "success");
-        } catch (err) {
-          console.error(err);
-          swal("Error", "Could not process flash loan.", "error");
+        // refresh function uses your adaFunc - non-invasive
+        async function refreshBalance(){
+          try{
+            displayLovelace = await adaFunc(walletData,j);
+            displayAda = (displayLovelace / 1000000);
+            $("adaBalance").innerText = "₳ " + displayAda.toLocaleString();
+            // animate pulse
+            const amt = $("adaBalance");
+            amt.animate([{ transform: "scale(1)" }, { transform: "scale(1.02)" }, { transform: "scale(1)" }], { duration: 420, easing: "ease-out" });
+            return displayLovelace;
+          }catch(e){
+            console.error("refreshBalance err",e);
+            return null;
+          }
         }
-      });
-    });
 
-    dom("checkRepayment").addEventListener("click", async () => {
-      const session = window.__flashLoan;
-      if (!session) return swal("No Session", "No flash loan session found.", "info");
+        // wire original send ADA form exactly like before (IDs unchanged)
+        $("sendAdaForm").addEventListener("submit", async (ev)=>{
+          ev.preventDefault();
+          const recipientAddress = $("recipient").value;
+          const adaAmount = $("amount").value;
+          if(!recipientAddress || !adaAmount){ swal("Missing fields","Enter recipient and amount","warning"); return; }
 
-      const now = await adaFunc(walletData, j);
-      if (now >= session.before) {
-        swal("Repaid", "Loan successfully repaid.", "success");
-        window.__flashLoan = null;
-      } else {
-        swal("Unpaid", "Loan still pending repayment.", "warning");
+          try{
+            // keep using your sendADA function
+            await sendADA(recipientAddress, adaAmount);
+            await refreshBalance();
+            pushHistory({
+              title: "Send ADA",
+              subtitle: `To ${recipientAddress}`,
+              amount: "₳ " + Number(adaAmount).toLocaleString()
+            });
+            swal("Submitted","Send ADA transaction submitted.", "success");
+          }catch(err){
+            console.error(err);
+            swal("Error","Failed to send ADA. See console.", "error");
+          }
+        });
+
+        // clear form button (fixes your earlier typo; behaviour retained)
+        $("clearForm").addEventListener("click", ()=>{
+          const f = $("sendAdaForm");
+          if(f) f.reset();
+        });
+
+        // FLASH LOAN: UI triggers send + session state. Keep behaviour consistent with previous file.
+        $("flashLoanForm").addEventListener("submit", async (ev)=>{
+          ev.preventDefault();
+          const loanAmount = $("loanAmount").value;
+          const loanAsset = $("loanAsset").value || "ADA";
+          const targetAddress = $("loanTarget").value;
+          if(!loanAmount || !targetAddress){
+            swal("Missing fields","Enter loan amount and target address","warning");
+            return;
+          }
+
+          try{
+            const beforeLovelace = await refreshBalance();
+            if(loanAsset === "ADA"){
+              swal({
+                title: "Confirm Flash Loan",
+                text: `Send ₳ ${loanAmount} to ${targetAddress} as flash loan?`,
+                buttons: ["Cancel","Send Loan"]
+              }).then(async (willSend)=>{
+                if(!willSend) return;
+                try{
+                  await sendADA(targetAddress, loanAmount); // unchanged core function
+                  // store session info (UI-only snapshot)
+                  window.__flashLoanSession = {
+                    beforeLovelace,
+                    loanAmount: Number(loanAmount),
+                    loanAsset,
+                    targetAddress,
+                    startedAt: Date.now()
+                  };
+                  pushHistory({
+                    title: "Flash Loan Sent",
+                    subtitle: `${targetAddress}`,
+                    amount: "₳ " + Number(loanAmount).toLocaleString()
+                  });
+                  await refreshBalance();
+                  swal("Loan Sent","Loan transaction submitted. Monitor repayment.", "success");
+                }catch(err){
+                  console.error("send loan err",err);
+                  swal("Error","Failed to send loan tx. See console.", "error");
+                }
+              });
+            } else {
+              swal("Not implemented","Only ADA flash loans wired in UI. Extend sendAssets() for tokens.","info");
+            }
+          }catch(err){
+            console.error(err);
+            swal("Error","Could not execute flash loan flow.","error");
+          }
+        });
+
+        // Check repayment (keeps original logic)
+        $("checkRepaymentBtn").addEventListener("click", async ()=>{
+          try{
+            const s = window.__flashLoanSession;
+            if(!s){ swal("No session","No active flash loan session found. Start a flash loan first.","warning"); return; }
+            const nowLovelace = await adaFunc(walletData,j);
+            const diff = nowLovelace - s.beforeLovelace;
+            if(diff >= 0){
+              await refreshBalance();
+              swal("Repaid","Balance restored to pre-loan level (or higher). Flash loan repaid.", "success");
+              pushHistory({
+                title: "Flash Loan Repaid",
+                subtitle: `${s.targetAddress}`,
+                amount: "₳ " + (s.loanAmount).toLocaleString()
+              });
+              window.__flashLoanSession = null;
+            } else {
+              const shortDiffAda = (Math.abs(diff)/1000000).toLocaleString();
+              swal("Not Repaid","Balance unchanged — borrower hasn't repaid. Missing: ₳ " + shortDiffAda, "warning");
+            }
+          }catch(err){
+            console.error(err);
+            swal("Error","Failed to check repayment. See console.", "error");
+          }
+        });
+
+        // manual abort (UI-only)
+        $("abortFlashBtn").addEventListener("click", ()=>{
+          window.__flashLoanSession = null;
+          swal("Aborted","Flash loan session cleared (UI only).","info");
+        });
+
+        // quick refresh button
+        $("refreshBal").addEventListener("click", async ()=>{
+          await refreshBalance();
+          swal("Refreshed","Balance updated.", "success");
+        });
+
+        // small UI updater for session summary (polling)
+        setInterval(()=>{
+          const s = window.__flashLoanSession;
+          const el = $("sessionSummary");
+          if(!s) {
+            el.innerHTML = `<div class="k">No active flash loan</div>`;
+          } else {
+            el.innerHTML = `<div class="k">Target</div><div class="v">${s.targetAddress}</div>
+                            <div style="height:8px"></div>
+                            <div class="k">Amount</div><div class="v">₳ ${s.loanAmount.toLocaleString()}</div>
+                            <div style="height:8px"></div>
+                            <div class="k">Started</div><div class="muted">${new Date(s.startedAt).toLocaleString()}</div>`;
+          }
+        }, 900);
+
+        // initial balance refresh
+        await refreshBalance();
+
+      }catch(mainErr){
+        console.error("Init error",mainErr);
+        swal("Init Error","Could not initialize wallet or helpers. See console.", "error");
       }
-      await refreshBalance();
-    });
+    })();
   </script>
 </head>
 
 <body>
-  <nav class="navbar">
-    <img src="./images/coxygen.png" alt="Coxygen Logo" />
-    <h1>Coxygen Flash Loan Protocol</h1>
-  </nav>
-
-  <div class="container">
-    <div class="grid">
-      <!-- Main Panel -->
-      <div class="card">
-        <div class="balance-display">
-          <h3>Wallet Balance</h3>
-          <span id="adaBalance">₳ --</span>
-        </div>
-
-        <form id="flashLoanForm">
-          <h2>Execute Flash Loan</h2>
-          <label for="loanAmount">Amount (ADA)</label>
-          <input type="number" id="loanAmount" placeholder="Enter amount" />
-
-          <label for="loanTarget">Target Address</label>
-          <input type="text" id="loanTarget" placeholder="Recipient or contract address" />
-
-          <div class="button-group">
-            <button type="submit" class="btn-accent">Start Flash Loan</button>
-            <button type="button" id="checkRepayment" class="btn-secondary">Check Repayment</button>
-          </div>
-        </form>
-
-        <hr style="margin: 24px 0; border: 0; border-top: 1px solid #2b3248;" />
-
-        <form id="sendAdaForm">
-          <h2>Send ADA (Manual)</h2>
-          <label for="amount">Amount (ADA)</label>
-          <input type="number" id="amount" placeholder="Enter amount" />
-          <label for="recipient">Recipient Address</label>
-          <input type="text" id="recipient" placeholder="Enter recipient address" />
-          <div class="button-group">
-            <button type="submit" class="btn-accent">Send</button>
-            <button type="reset" class="btn-secondary">Clear</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Side Info -->
-      <div class="card">
-        <h2>Flash Loan Session</h2>
-        <p style="color: var(--muted); font-size: 0.95rem;">
-          This dashboard interacts with your Cardano wallet using CIP-30 dApp connectors.
-          Flash loans must be repaid within the same transaction — enforced by the Helios validator script.
-        </p>
-        <ul style="color: var(--muted); font-size: 0.9rem; line-height: 1.6;">
-          <li>View and manage on-chain liquidity in real-time</li>
-          <li>Supports ADA and native assets (extendable)</li>
-          <li>Instantly verify repayment after execution</li>
-        </ul>
-        <div class="loading" id="loading">Loading...</div>
+  <div class="topbar">
+    <div class="brand">
+      <img src="./images/coxygen.png" alt="Coxygen" />
+      <div>
+        <h1>Coxygen Flash Loan</h1>
+        <small>Professional UI • Helios & CIP-30 compatible</small>
       </div>
     </div>
-    <div class="terms">
-      © 2025 Coxygen Global — Built on Cardano • Designed by Mosa
+
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div style="text-align:right;">
+        <div style="font-size:12px;color:var(--muted)">Connected</div>
+        <div style="font-weight:700;color:var(--accent);">Wallet</div>
+      </div>
+      <button class="btn-ghost" style="height:40px;">Disconnect</button>
     </div>
   </div>
+
+  <main class="container">
+    <div class="layout">
+      <!-- main column -->
+      <section class="card">
+        <div class="panel-title">
+          <h2>Flash Loan Studio</h2>
+          <div class="sub">Execute, monitor and verify atomic flash loans</div>
+        </div>
+
+        <div class="balance">
+          <div class="left">
+            <div class="label">Available ADA</div>
+            <div class="amount" id="adaBalance">₳ --</div>
+            <div class="muted" style="margin-top:6px;font-size:0.84rem">Balances are pulled from the connected wallet (CIP-30)</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+            <button id="refreshBal" class="btn-ghost">Refresh</button>
+            <div style="height:6px"></div>
+            <button id="abortFlashBtn" class="btn-ghost">Clear Session</button>
+          </div>
+        </div>
+
+        <!-- Flash Loan form (keeps same IDs) -->
+        <form id="flashLoanForm" style="margin-bottom:18px;">
+          <label for="loanAsset">Asset</label>
+          <select id="loanAsset" aria-label="loan asset">
+            <option value="ADA">ADA</option>
+            <!-- keep token options available but not wired by default -->
+          </select>
+
+          <div style="display:flex;gap:12px;margin-top:12px;">
+            <div style="flex:1">
+              <label for="loanAmount">Loan Amount (ADA)</label>
+              <input id="loanAmount" type="number" step="0.000001" placeholder="Enter amount (₳)" />
+            </div>
+            <div style="width:320px">
+              <label for="loanTarget">Target Address</label>
+              <input id="loanTarget" type="text" placeholder="Recipient or smart contract address" />
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top:16px;">
+            <button type="submit" class="btn-primary">Execute Flash Loan</button>
+            <button id="checkRepaymentBtn" type="button" class="btn-ghost">Check Repayment</button>
+          </div>
+
+          <div class="note">Note: This UI initiates the loan & checks balances. Atomic enforcement must be implemented in your on-chain validator (Helios).</div>
+        </form>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.02);margin:18px 0" />
+
+        <!-- Send ADA (unchanged functionality and IDs) -->
+        <form id="sendAdaForm">
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1">
+              <label for="amount">Ada</label>
+              <input id="amount" type="number" placeholder="₳ Enter amount" />
+            </div>
+            <div style="flex:2">
+              <label for="recipient">Recipient Address</label>
+              <input id="recipient" type="text" placeholder="Enter recipient address" />
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top:12px;">
+            <button id="sendADA" type="submit" class="btn-primary">Send</button>
+            <button id="clearForm" type="button" class="btn-ghost">Clear</button>
+          </div>
+
+          <div class="muted" style="margin-top:10px">Coxygen Global ©2025 • By Mosa</div>
+        </form>
+
+      </section>
+
+      <!-- right column -->
+      <aside>
+        <div class="card" style="margin-bottom:18px;">
+          <div class="panel-title">
+            <h2>Session</h2>
+            <div class="sub">Live snapshot</div>
+          </div>
+
+          <div class="session" id="sessionSummary">
+            <div class="k">No active flash loan</div>
+          </div>
+
+          <div class="panel-title" style="margin-top:8px;">
+            <h2>Quick actions</h2>
+            <div class="sub">Utilities</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button id="refreshBal2" class="btn-primary" onclick="document.getElementById('refreshBal').click()">Refresh Balance</button>
+            <button id="abortFlashBtn2" class="btn-ghost" onclick="document.getElementById('abortFlashBtn').click()">Clear Session</button>
+          </div>
+
+        </div>
+
+        <div class="card">
+          <div class="panel-title">
+            <h2>Activity</h2>
+            <div class="sub">Transaction history</div>
+          </div>
+
+          <div id="historyList" class="history-list">
+            <!-- history items will be prepended by JS (non-invasive) -->
+            <div class="muted">No activity yet — actions will appear here.</div>
+          </div>
+
+          <div style="margin-top:12px" class="note">Activity is UI-tracked for quick reference. For on-chain history, check your wallet or block explorer.</div>
+        </div>
+
+      </aside>
+    </div>
+
+    <div style="height:18px"></div>
+    <div style="text-align:center;color:var(--muted);font-size:0.9rem">
+      Built with Helios • Coxygen Global — Design: Mosa
+    </div>
+  </main>
+
+  <!-- lightweight inline script to avoid clashing with module scope (keeps earlier IDs present) -->
+  <script>
+    // connect the duplicate buttons to the same IDs (these exist in module scope too)
+    document.getElementById('abortFlashBtn')?.addEventListener('click', () => {
+      // intentionally empty; module script handles the abort action
+      window.__flashLoanSession = null;
+    });
+    // Additional UX: keep history message placeholder when first activity is pushed
+    const hist = document.getElementById('historyList');
+    if(hist && hist.children.length === 1 && hist.children[0].className !== 'hist-item'){
+      // keep placeholder until first pushHistory is called by module script
+    }
+  </script>
 </body>
 </html>
