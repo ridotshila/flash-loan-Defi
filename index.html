@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coxygen Flash Loan — Powered by Cardano</title>
+  <link rel="icon" type="image/png" href="./images/coxygen.png" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;600;700&display=swap");
+
+    :root {
+      --bg: #0b0f19;
+      --card: #141b2d;
+      --accent: #00aaff;
+      --text: #f5f6fa;
+      --muted: #9aa0b6;
+      --radius: 14px;
+      --transition: 0.3s ease all;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "League Spartan", sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 30px;
+      background: #101626;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar img {
+      height: 42px;
+    }
+
+    .navbar h1 {
+      font-size: 1.4rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 25px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #2b3248;
+      background: #1b2235;
+      color: var(--text);
+      outline: none;
+      font-size: 0.95rem;
+      transition: var(--transition);
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-accent:hover {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+
+    .btn-secondary {
+      background: #2b3248;
+      color: var(--muted);
+    }
+
+    .btn-secondary:hover {
+      background: #343d5c;
+    }
+
+    .balance-display {
+      background: #101626;
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .balance-display h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .balance-display span {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      transition: var(--transition);
+    }
+
+    .terms {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 30px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 14px;
+      font-size: 1rem;
+      color: var(--accent);
+      display: none;
+    }
+
+    @media (max-width: 850px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script type="module">
+    import {
+      bytesToHex,
+      Cip30Wallet,
+      WalletHelper,
+      TxOutput,
+      Assets,
+      bytesToText,
+      hexToBytes,
+      AssetClass,
+      Tx,
+      Address,
+      NetworkParams,
+      Value,
+      MintingPolicyHash,
+      Program,
+      ByteArrayData,
+      ConstrData,
+      NetworkEmulator,
+      PubKey,
+      textToBytes,
+      Datum,
+      ListData,
+      IntData,
+    } from "./helios.js";
+
+    import {
+      txPrerequisites,
+      init,
+      walletEssentials,
+      txFunc,
+      hlib,
+      hexToTex,
+      shortAddressFunc,
+      addressFunc,
+      adaFunc,
+      assetFunc,
+      getAssets,
+      sendADA,
+      sendAssets,
+      showWalletData,
+      mint,
+      txDeadLine,
+      baseAddressPKH,
+      submitTx,
+      getAssetsFromValue,
+    } from "./coxylib.js";
+
+    import { opt, j } from "./jimba.js";
+
+    opt._R = 1;
+    opt._O = 1;
+    opt._M = 1;
+    opt._T = 1;
+    opt._Ob = 0;
+    opt._FailsOnly = 0;
+    opt._F = 0;
+    opt._tNo = 1;
+
+    const dom = (id) => document.getElementById(id);
+
+    const wallet = await init(j);
+    const walletData = await walletEssentials(
+      wallet,
+      Cip30Wallet,
+      WalletHelper,
+      Value,
+      txPrerequisites.minAda,
+      j
+    );
+
+    let balance = await adaFunc(walletData, j);
+    dom("adaBalance").innerText = "₳ " + (balance / 1_000_000).toLocaleString();
+
+    async function refreshBalance() {
+      balance = await adaFunc(walletData, j);
+      dom("adaBalance").innerText = "₳ " + (balance / 1_000_000).toLocaleString();
+    }
+
+    // Send ADA
+    dom("sendAdaForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const recipient = dom("recipient").value;
+      const amount = dom("amount").value;
+
+      if (!recipient || !amount)
+        return swal("Incomplete", "Enter recipient and amount.", "warning");
+
+      swal("Sending...", "Processing transaction.", "info");
+      try {
+        await sendADA(recipient, amount);
+        await refreshBalance();
+        swal("Success", "ADA sent successfully!", "success");
+      } catch (err) {
+        console.error(err);
+        swal("Error", "Transaction failed.", "error");
+      }
+    });
+
+    // Flash Loan
+    dom("flashLoanForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amount = dom("loanAmount").value;
+      const target = dom("loanTarget").value;
+
+      if (!amount || !target)
+        return swal("Missing Info", "Enter amount and target address.", "warning");
+
+      swal({
+        title: "Confirm Flash Loan",
+        text: `Execute flash loan of ₳${amount}?`,
+        icon: "info",
+        buttons: ["Cancel", "Proceed"],
+      }).then(async (confirm) => {
+        if (!confirm) return;
+
+        try {
+          const before = await adaFunc(walletData, j);
+          await sendADA(target, amount);
+          window.__flashLoan = { before, amount, target };
+          await refreshBalance();
+          swal("Loan Executed", "Flash loan transaction sent.", "success");
+        } catch (err) {
+          console.error(err);
+          swal("Error", "Could not process flash loan.", "error");
+        }
+      });
+    });
+
+    dom("checkRepayment").addEventListener("click", async () => {
+      const session = window.__flashLoan;
+      if (!session) return swal("No Session", "No flash loan session found.", "info");
+
+      const now = await adaFunc(walletData, j);
+      if (now >= session.before) {
+        swal("Repaid", "Loan successfully repaid.", "success");
+        window.__flashLoan = null;
+      } else {
+        swal("Unpaid", "Loan still pending repayment.", "warning");
+      }
+      await refreshBalance();
+    });
+  </script>
+</head>
+
+<body>
+  <nav class="navbar">
+    <img src="./images/coxygen.png" alt="Coxygen Logo" />
+    <h1>Coxygen Flash Loan Protocol</h1>
+  </nav>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Main Panel -->
+      <div class="card">
+        <div class="balance-display">
+          <h3>Wallet Balance</h3>
+          <span id="adaBalance">₳ --</span>
+        </div>
+
+        <form id="flashLoanForm">
+          <h2>Execute Flash Loan</h2>
+          <label for="loanAmount">Amount (ADA)</label>
+          <input type="number" id="loanAmount" placeholder="Enter amount" />
+
+          <label for="loanTarget">Target Address</label>
+          <input type="text" id="loanTarget" placeholder="Recipient or contract address" />
+
+          <div class="button-group">
+            <button type="submit" class="btn-accent">Start Flash Loan</button>
+            <button type="button" id="checkRepayment" class="btn-secondary">Check Repayment</button>
+          </div>
+        </form>
+
+        <hr style="margin: 24px 0; border: 0; border-top: 1px solid #2b3248;" />
+
+        <form id="sendAdaForm">
+          <h2>Send ADA (Manual)</h2>
+          <label for="amount">Amount (ADA)</label>
+          <input type="number" id="amount" placeholder="Enter amount" />
+          <label for="recipient">Recipient Address</label>
+          <input type="text" id="recipient" placeholder="Enter recipient address" />
+          <div class="button-group">
+            <button type="submit" class="btn-accent">Send</button>
+            <button type="reset" class="btn-secondary">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Side Info -->
+      <div class="card">
+        <h2>Flash Loan Session</h2>
+        <p style="color: var(--muted); font-size: 0.95rem;">
+          This dashboard interacts with your Cardano wallet using CIP-30 dApp connectors.
+          Flash loans must be repaid within the same transaction — enforced by the Helios validator script.
+        </p>
+        <ul style="color: var(--muted); font-size: 0.9rem; line-height: 1.6;">
+          <li>View and manage on-chain liquidity in real-time</li>
+          <li>Supports ADA and native assets (extendable)</li>
+          <li>Instantly verify repayment after execution</li>
+        </ul>
+        <div class="loading" id="loading">Loading...</div>
+      </div>
+    </div>
+    <div class="terms">
+      © 2025 Coxygen Global — Built on Cardano • Designed by Mosa
+    </div>
+  </div>
+</body>
+</html>
